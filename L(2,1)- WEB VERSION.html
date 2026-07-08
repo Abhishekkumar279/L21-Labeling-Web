@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L(2,1)-Labeling of Trees — Interactive Lab</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:#f0f2f5;min-height:100vh;color:#1e293b}
+  .header{text-align:center;padding:1.5rem 1rem 1rem;background:#fff;border-bottom:1px solid #e2e8f0}
+  .header h1{font-size:1.5rem;font-weight:700;color:#1e293b;margin-bottom:.2rem}
+  .header p{font-size:.83rem;color:#64748b}
+  .layout{display:grid;grid-template-columns:275px 1fr;gap:1.2rem;max-width:1200px;margin:0 auto;padding:1.2rem 1.2rem 2rem}
+  .panel{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:1.2rem;display:flex;flex-direction:column;gap:.9rem}
+  .panel-title{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:#6366f1;border-bottom:1px solid #e2e8f0;padding-bottom:.4rem}
+  .field{display:flex;flex-direction:column;gap:.3rem}
+  .field-top{display:flex;justify-content:space-between;align-items:center}
+  .field label{font-size:.78rem;color:#475569;font-weight:500}
+  .val-pill{font-size:.78rem;font-weight:700;color:#6366f1;background:#eef2ff;border:1px solid #c7d2fe;border-radius:8px;padding:1px 9px;min-width:28px;text-align:center}
+  input[type=range]{-webkit-appearance:none;width:100%;height:4px;border-radius:4px;background:#e2e8f0;outline:none;cursor:pointer}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:#6366f1;cursor:pointer}
+  .hint-text{font-size:.67rem;color:#94a3b8}
+  select{width:100%;font-size:.78rem;padding:6px 8px;border:1px solid #e2e8f0;border-radius:9px;background:#fff;color:#1e293b;cursor:pointer;outline:none}
+  .btn-run{width:100%;padding:10px;border:none;border-radius:10px;font-size:.86rem;font-weight:600;cursor:pointer;background:#6366f1;color:#fff;transition:background .15s}
+  .btn-run:hover{background:#4f46e5}
+  .main{display:flex;flex-direction:column;gap:1rem}
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.65rem}
+  .stat{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:.75rem .9rem;text-align:center}
+  .stat-lbl{font-size:.63rem;color:#94a3b8;margin-bottom:.2rem;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
+  .stat-val{font-size:1.4rem;font-weight:700;color:#1e293b}
+  .stat-val.ok{color:#16a34a}.stat-val.warn{color:#d97706}.stat-val.info{color:#6366f1}
+  .canvas-wrap{background:#fff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;position:relative}
+  canvas{display:block;width:100%;height:auto}
+  .canvas-lbl{position:absolute;top:9px;left:13px;font-size:.66rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.07em}
+  .legend{display:flex;gap:.9rem;flex-wrap:wrap;font-size:.71rem;color:#64748b}
+  .legend span{display:flex;align-items:center;gap:4px}
+  .dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex-shrink:0}
+  .bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+  .info-card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:.95rem 1.1rem}
+  .info-card-title{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#6366f1;margin-bottom:.5rem;display:flex;align-items:center;gap:.45rem;flex-wrap:wrap}
+  .rbadge{display:inline-block;font-size:.71rem;font-weight:700;padding:2px 9px;border-radius:20px}
+  .b-ok{background:#dcfce7;color:#16a34a;border:1px solid #bbf7d0}
+  .b-warn{background:#fef9c3;color:#b45309;border:1px solid #fde68a}
+  .b-info{background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe}
+  .expl-body{font-size:.77rem;color:#475569;line-height:1.75}
+  .expl-body b{color:#1e293b;font-weight:600}
+  .hl-ok{background:#f0fdf4;border-left:3px solid #16a34a;padding:.35rem .65rem;border-radius:0 8px 8px 0;margin:.4rem 0;font-size:.75rem;color:#14532d}
+  .hl-warn{background:#fffbeb;border-left:3px solid #d97706;padding:.35rem .65rem;border-radius:0 8px 8px 0;margin:.4rem 0;font-size:.75rem;color:#78350f}
+  .hl-info{background:#eef2ff;border-left:3px solid #6366f1;padding:.35rem .65rem;border-radius:0 8px 8px 0;margin:.4rem 0;font-size:.75rem;color:#312e81}
+  .steps-log{font-size:.73rem;color:#64748b;line-height:1.9;max-height:195px;overflow-y:auto;padding-right:3px}
+  .steps-log::-webkit-scrollbar{width:3px}
+  .steps-log::-webkit-scrollbar-thumb{background:#c7d2fe;border-radius:3px}
+  .s-head{color:#6366f1;font-weight:600;display:block;margin-top:.2rem}
+  .s-ok{color:#16a34a;font-weight:600}.s-warn{color:#d97706;font-weight:600}.s-info{color:#6366f1;font-weight:600}
+  .s-step{color:#334155}
+  .rule-table{width:100%;border-collapse:collapse;font-size:.72rem;margin-top:.3rem}
+  .rule-table th{background:#f8fafc;color:#64748b;padding:5px 8px;text-align:left;font-weight:600;border-bottom:1px solid #e2e8f0;font-size:.65rem;text-transform:uppercase}
+  .rule-table td{padding:5px 8px;border-bottom:1px solid #f1f5f9;color:#475569}
+  .rule-table tr.a-ok td{background:#f0fdf4;color:#16a34a;font-weight:600}
+  .rule-table tr.a-warn td{background:#fffbeb;color:#b45309;font-weight:600}
+  .rule-table tr.a-info td{background:#eef2ff;color:#4338ca;font-weight:600}
+  .theory-card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:.95rem 1.1rem}
+  .theory-card-title{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#6366f1;margin-bottom:.55rem}
+  .theory-body{font-size:.76rem;color:#475569;line-height:1.8}
+  .theory-body b{color:#1e293b;font-weight:600}
+  .theory-body .tbl{width:100%;border-collapse:collapse;margin-top:.45rem;font-size:.72rem}
+  .theory-body .tbl th{background:#f8fafc;color:#64748b;padding:4px 8px;border:1px solid #e2e8f0;font-weight:600;font-size:.65rem;text-transform:uppercase}
+  .theory-body .tbl td{padding:4px 8px;border:1px solid #f1f5f9;color:#475569}
+  .theory-body .tbl tr.t-warn td{background:#fffbeb;color:#b45309;font-weight:600}
+  .theory-body .tbl tr.t-info td{background:#eef2ff;color:#4338ca;font-weight:600}
+  .divider{border:none;border-top:1px solid #e2e8f0}
+  .footer{text-align:center;padding:.6rem;font-size:.69rem;color:#94a3b8;background:#fff;border-top:1px solid #e2e8f0}
+  .ok-box{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:.45rem .8rem;font-size:.74rem;color:#14532d;display:none}
+  .err-box{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:.45rem .8rem;font-size:.74rem;color:#991b1b;display:none}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>L(2,1)-Labeling of Trees — Interactive Lab</h1>
+  <p>d(u,v) = 2 or 4 &nbsp;|&nbsp; Every other max-degree pair ≥ 7 from BOTH u AND v &nbsp;|&nbsp; Strict L(2,1): adjacent differ ≥2, dist-2 distinct</p>
+</div>
+
+<div class="layout">
+  <div class="panel">
+    <div class="panel-title">Tree Parameters</div>
+    <div class="field">
+      <div class="field-top"><label>Max Degree (Δ)</label><span class="val-pill" id="vd">3</span></div>
+      <input type="range" id="sd" min="2" max="7" value="3" step="1" oninput="document.getElementById('vd').textContent=this.value">
+      <span class="hint-text">2–4: main theorem &nbsp;|&nbsp; 5–7: extended</span>
+    </div>
+    <div class="field">
+      <div class="field-top"><label>Max-Degree Vertices (r)</label><span class="val-pill" id="vr">3</span></div>
+      <input type="range" id="sr" min="2" max="4" value="3" step="1" oninput="document.getElementById('vr').textContent=this.value">
+      <span class="hint-text">r=2: only u,v &nbsp;|&nbsp; r≥3: extra M at dist≥7 from u AND v</span>
+    </div>
+    <div class="field">
+      <div class="field-top"><label>Exceptional Pair Distance d(u,v)</label><span class="val-pill" id="vpd">2</span></div>
+      <input type="range" id="spd" min="2" max="4" step="2" value="2" oninput="document.getElementById('vpd').textContent=this.value">
+      <span class="hint-text">Only 2 or 4 (theorem condition)</span>
+    </div>
+    <div class="field">
+      <label style="margin-bottom:.25rem">Quick Presets</label>
+      <select id="preset" onchange="loadPreset()">
+        <option value="">— choose a preset —</option>
+        <optgroup label="Δ &lt; 5 (Main Theorem)">
+          <option value="3,3,2">Δ=3, r=3, d=2 → λ=Δ+1=4</option>
+          <option value="3,3,4">Δ=3, r=3, d=4 → λ=Δ+2=5 ⚠</option>
+          <option value="4,3,2">Δ=4, r=3, d=2 → λ=Δ+1=5</option>
+          <option value="4,4,4">Δ=4, r=4, d=4 → λ=Δ+1=5</option>
+          <option value="3,2,2">r=2, Δ=3, d=2 → λ=Δ+1=4</option>
+          <option value="3,2,4">r=2, Δ=3, d=4 → λ=Δ+2=5 ⚠</option>
+          <option value="4,2,2">r=2, Δ=4, d=2 → λ=Δ+1=5</option>
+        </optgroup>
+        <optgroup label="Δ ≥ 5 (Extended)">
+          <option value="5,3,2">Δ=5, r=3, d=2 → λ=Δ+1=6</option>
+          <option value="5,3,4">Δ=5, r=3, d=4 → λ=Δ+1=6</option>
+          <option value="6,3,2">Δ=6, r=3, d=2 → λ=Δ+1=7</option>
+        </optgroup>
+      </select>
+    </div>
+    <div class="ok-box"  id="okbox"></div>
+    <div class="err-box" id="errbox"></div>
+    <button class="btn-run" onclick="rebuild()">Generate &amp; Label Tree</button>
+    <hr class="divider">
+    <div>
+      <div class="panel-title" style="margin-bottom:.5rem">Rules Summary</div>
+      <table class="rule-table" id="ruletable">
+        <thead><tr><th>Δ</th><th>d(u,v)</th><th>λ(T)</th></tr></thead>
+        <tbody>
+          <tr id="r1"><td>4</td><td>2 or 4</td><td>Δ+1 = 5</td></tr>
+          <tr id="r2"><td>3</td><td>2</td><td>Δ+1 = 4</td></tr>
+          <tr id="r3"><td>3</td><td>4</td><td>Δ+2 = 5 ⚠</td></tr>
+          <tr id="r4"><td>≥ 5</td><td>2 or 4</td><td>Δ+1 (always)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="stat-grid">
+      <div class="stat"><div class="stat-lbl">Max Degree Δ</div><div class="stat-val" id="cd">—</div></div>
+      <div class="stat"><div class="stat-lbl">Vertices r</div><div class="stat-val" id="cr">—</div></div>
+      <div class="stat"><div class="stat-lbl">d(u,v)</div><div class="stat-val" id="cpd">—</div></div>
+      <div class="stat"><div class="stat-lbl">Span λ(T)</div><div class="stat-val" id="csp">—</div></div>
+    </div>
+    <div class="legend">
+      <span><span class="dot" style="background:#16a34a;border:2px solid #14532d"></span>Exceptional pair u, v</span>
+      <span><span class="dot" style="background:#ea580c;border:2px solid #9a3412"></span>Other max-degree M (dist≥7 from u AND v)</span>
+      <span><span class="dot" style="background:#cbd5e1"></span>Regular vertex</span>
+      <span style="color:#94a3b8;font-size:.69rem">[n] = L(2,1) label</span>
+    </div>
+    <div class="canvas-wrap">
+      <div class="canvas-lbl">Tree Diagram</div>
+      <canvas id="cv" width="760" height="370"></canvas>
+    </div>
+    <div class="bottom-grid">
+      <div class="info-card">
+        <div class="info-card-title">Result &amp; Explanation <span class="rbadge" id="rbadge">—</span></div>
+        <div class="expl-body" id="expl">Set parameters and click <b>Generate &amp; Label Tree</b>.</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-title">Step-by-Step Labeling Log</div>
+        <div class="steps-log" id="steps">Steps appear here after generation.</div>
+      </div>
+    </div>
+    <div class="theory-card">
+      <div class="theory-card-title">L(2,1)-Labeling — Definition &amp; All Cases</div>
+      <div class="theory-body">
+        <b>L(2,1)-labeling</b>: f: V→{0,1,2,…} where |f(a)−f(b)|≥2 if adjacent, and f(a)≠f(b) if distance=2.<br>
+        <b>λ(T)</b> = min span. One exceptional pair at d=2 or 4; every other M-vertex pair at distance ≥7 from BOTH u and v.
+        <table class="tbl">
+          <thead><tr><th>Δ</th><th>r</th><th>d(u,v)</th><th>Other M pairs</th><th>λ(T)</th></tr></thead>
+          <tbody>
+            <tr><td>4</td><td>≥2</td><td>2 or 4</td><td>≥7 from u AND v</td><td>Δ+1=5</td></tr>
+            <tr><td>3</td><td>≥2</td><td>2</td><td>≥7 from u AND v</td><td>Δ+1=4</td></tr>
+            <tr class="t-warn"><td>3</td><td>≥2</td><td>4</td><td>≥7 from u AND v</td><td>Δ+2=5</td></tr>
+            <tr class="t-info"><td>≥5</td><td>≥2</td><td>2 or 4</td><td>≥7 from u AND v</td><td>Δ+1</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="footer">L(2,1)-Labeling Interactive Lab — save this HTML file, works offline in any browser forever</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  KEY INSIGHT for correct distances:
+//
+//  Tree structure:
+//
+//  [u-arms] --- u ---(pd edges)--- v --- [v-arms]
+//                                  |
+//                              long-chain (len=L)
+//                                  |
+//                                 w_i (extra M-vertex)
+//                                  |
+//                              [w-arms]
+//
+//  d(w_i, v) = L   (chain from v directly)
+//  d(w_i, u) = L + pd
+//
+//  We need BOTH >= 7:
+//    L >= 7          (so d(w,v) >= 7)
+//    L + pd >= 7     (always true if L>=7)
+//
+//  So: chain length L = 7 from v directly.
+//  Then d(w,v)=7 ✓  and  d(w,u)=7+pd >= 9 ✓
+//
+//  For multiple extra M-vertices w_1, w_2, ...:
+//  Each hangs from v via its OWN separate chain of length 7.
+//  d(w_i, w_j) = 7 + 7 = 14 >= 7 ✓  (they meet at v)
+//  Wait — if both chains start at v, then d(w_i,w_j)=14 ✓
+//  BUT v already has limited degree (Δ).
+//  v has: 1 edge to spine + (Δ-1) arm-edges.
+//  We need 1 slot for each extra M-vertex chain.
+//  So v's arms = Δ - 1 - (r-2) arms, rest used for chains.
+//  If r-2 > Δ-1, not possible — but r<=4 and Δ>=2 so fine.
+// ═══════════════════════════════════════════════════════════════
+
+const CW=760, CH=370, NR=16;
+let nodes=[], edges=[], lbls={}, pU=0, pV=0, pD=0, Marr=[];
+
+function nbOf(id){
+  return edges.filter(([a,b])=>a===id||b===id).map(([a,b])=>a===id?b:a);
+}
+
+function bfsDist(src){
+  const d={[src]:0},q=[src];
+  while(q.length){
+    const u=q.shift();
+    nbOf(u).forEach(v=>{if(d[v]===undefined){d[v]=d[u]+1;q.push(v);}});
+  }
+  return d;
+}
+
+function findPath(src,dst){
+  const par={[src]:null},q=[src];
+  while(q.length){
+    const u=q.shift();
+    if(u===dst){const p=[];let c=u;while(c!==null){p.unshift(c);c=par[c];}return p;}
+    nbOf(u).forEach(v=>{if(par[v]===undefined){par[v]=u;q.push(v);}});
+  }
+  return null;
+}
+
+// ── Build tree ────────────────────────────────────────────────
+function buildTree(delta, r, pd){
+  nodes=[]; edges=[]; lbls={};
+  let nid=0;
+  const N=()=>{ nodes.push(nid); return nid++; };
+  const E=(a,b)=>edges.push([a,b]);
+
+  // number of extra M-vertices
+  const extraCount = r - 2;
+
+  // v needs: 1 spine edge + extraCount chain edges + (Δ-1-extraCount) arm edges
+  // u needs: 1 spine edge + (Δ-1) arm edges
+  const vArms = Math.max(0, delta - 1 - extraCount);
+  const uArms = delta - 1;
+
+  // ── spine u — ... — v ────────────────────────────────────
+  const u = N();
+  let prev = u;
+  for(let i=0;i<pd;i++){ const n=N(); E(prev,n); prev=n; }
+  const v = prev;
+
+  // ── arms from u (uArms arms, depth 2) ────────────────────
+  for(let i=0;i<uArms;i++){
+    const a=N(); E(u,a);
+    const b=N(); E(a,b);
+  }
+
+  // ── arms from v (vArms arms, depth 2) ────────────────────
+  for(let i=0;i<vArms;i++){
+    const a=N(); E(v,a);
+    const b=N(); E(a,b);
+  }
+
+  // ── extra M-vertices: chain of exactly 7 from v ──────────
+  // d(w, v) = 7 exactly
+  // d(w, u) = 7 + pd >= 9 >= 7  ✓
+  // d(w_i, w_j) = 14 >= 7 ✓ (both paths go through v)
+  const extraHubs=[];
+  for(let i=0;i<extraCount;i++){
+    // chain: v -- c1 -- c2 -- c3 -- c4 -- c5 -- c6 -- c7 -- w
+    // 7 edges from v  =>  d(w,v) = 7 exactly
+    // d(w,u) = 7 + pd >= 9 >= 7  ✓
+    // d(w_i,w_j) = 7+7 = 14 >= 7  ✓  (both paths go through v)
+    let cur = v;
+    for(let c=0;c<7;c++){ const n=N(); E(cur,n); cur=n; }
+    const w = N(); E(cur,w);
+    extraHubs.push(w);
+    // arms from w: (Δ-1) arms depth 2 (w has 1 edge to chain)
+    for(let j=0;j<delta-1;j++){
+      const a=N(); E(w,a);
+      const b=N(); E(a,b);
+    }
+  }
+
+  return {u, v, extraHubs};
+}
+
+// ── Forbidden set ─────────────────────────────────────────────
+function getForbidden(nd){
+  const f=new Set();
+  nbOf(nd).forEach(nb=>{
+    if(lbls[nb]!==undefined){
+      f.add(lbls[nb]-1); f.add(lbls[nb]); f.add(lbls[nb]+1);
+    }
+  });
+  nbOf(nd).forEach(nb=>{
+    nbOf(nb).forEach(nb2=>{
+      if(nb2!==nd && lbls[nb2]!==undefined) f.add(lbls[nb2]);
+    });
+  });
+  // remove negatives
+  [-2,-1].forEach(x=>f.delete(x));
+  return f;
+}
+
+// ── L(2,1) labeling ───────────────────────────────────────────
+function doLabel(u, v, pd, delta, extraHubs){
+  const isDelta3d4 = (delta===3 && pd===4);
+  const sp = delta + (isDelta3d4 ? 2 : 1);
+  lbls = {}; Marr = [u, v, ...extraHubs];
+  const steps = [];
+
+  // Step 1: u and v
+  lbls[u]=0; lbls[v]=sp;
+  steps.push({t:'head', x:'Step 1 — exceptional pair u, v'});
+  steps.push({t:'step', x:`f(u=${u}) = 0`});
+  steps.push({t:'step', x:`f(v=${v}) = ${sp}  [Δ+${isDelta3d4?2:1}=${sp}]`});
+
+  // Step 2: path vertices u→v
+  steps.push({t:'head', x:`Step 2 — path vertices between u and v (d=${pd})`});
+  const path = findPath(u, v);
+  if(path && path.length > 2){
+    path.slice(1,-1).forEach((nd,i)=>{
+      const f=getForbidden(nd);
+      let k=0; while(f.has(k)) k++;
+      lbls[nd]=k;
+      steps.push({t:'step', x:`f(${nd}) = ${k}  [path pos ${i+1}]`});
+    });
+  }
+
+  // Step 3: extra M-vertices
+  if(extraHubs.length > 0){
+    steps.push({t:'head', x:'Step 3 — other max-degree vertices (each at dist≥7 from u AND v)'});
+    const du=bfsDist(u), dv=bfsDist(v);
+    extraHubs.forEach(w=>{
+      // label chain nodes from v to w first
+      const wpath = findPath(v, w);
+      if(wpath && wpath.length > 2){
+        wpath.slice(1,-1).forEach(nd=>{
+          if(lbls[nd]===undefined){
+            const f=getForbidden(nd);
+            let k=0; while(f.has(k)) k++;
+            lbls[nd]=k;
+          }
+        });
+      }
+      // now label w itself
+      const f=getForbidden(w);
+      let k=0; while(f.has(k)) k++;
+      lbls[w]=k;
+      steps.push({t:'step', x:`f(M=${w}) = ${k}  [d(u,w)=${du[w]||'?'}, d(v,w)=${dv[w]||'?'}]`});
+    });
+  }
+
+  // Step 4: greedy BFS for all remaining
+  steps.push({t:'head', x:'Step 4 — greedy BFS for all remaining vertices'});
+  const vis={[u]:true}, q=[u], ord=[];
+  while(q.length){ const cu=q.shift(); ord.push(cu); nbOf(cu).forEach(nb=>{if(!vis[nb]){vis[nb]=true;q.push(nb);}}); }
+  ord.forEach(nd=>{
+    if(lbls[nd]!==undefined) return;
+    const f=getForbidden(nd);
+    let k=0; while(f.has(k)) k++;
+    lbls[nd]=k;
+    steps.push({t:'step', x:`f(${nd}) = ${k}`});
+  });
+
+  // Verify
+  const viols = verifyAll();
+  const vals = Object.values(lbls).map(Number);
+  const span = vals.length ? Math.max(...vals)-Math.min(...vals) : 0;
+  const ok = viols.length===0 && span<=sp;
+  const isDeltaHigh = (delta>=5);
+  const rt = isDeltaHigh?'info':(ok?'ok':'warn');
+  steps.push({t:rt, x:`${ok?'✓':'✗'} Span=${span}. λ(T)=Δ+${isDelta3d4?2:1}=${sp}`});
+  return {span, ok, isDelta3d4, isDeltaHigh, sp, steps, viols};
+}
+
+function verifyAll(){
+  const v=[];
+  const seen=new Set();
+  edges.forEach(([a,b])=>{
+    if(lbls[a]!==undefined && lbls[b]!==undefined){
+      const diff=Math.abs(lbls[a]-lbls[b]);
+      if(diff<2) v.push(`Adjacent ${a}[${lbls[a]}]-${b}[${lbls[b]}]: diff=${diff}`);
+    }
+  });
+  nodes.forEach(a=>{
+    nbOf(a).forEach(mid=>{
+      nbOf(mid).forEach(b=>{
+        if(b!==a && lbls[a]!==undefined && lbls[b]!==undefined && lbls[a]===lbls[b]){
+          const key=[Math.min(a,b),Math.max(a,b)].join('-');
+          if(!seen.has(key)){ seen.add(key); v.push(`Dist2 ${a}[${lbls[a]}]-${b}[${lbls[b]}]: same label`); }
+        }
+      });
+    });
+  });
+  return v;
+}
+
+// ── Layout: BFS levels left→right ────────────────────────────
+function makeLayout(){
+  const lv={[pU]:0}, q=[pU], byLv={0:[pU]};
+  while(q.length){
+    const cu=q.shift();
+    nbOf(cu).forEach(nb=>{
+      if(lv[nb]===undefined){
+        lv[nb]=lv[cu]+1;
+        if(!byLv[lv[nb]]) byLv[lv[nb]]=[];
+        byLv[lv[nb]].push(nb);
+        q.push(nb);
+      }
+    });
+  }
+  const maxLv=Math.max(...Object.values(lv));
+  const px=54, py=28;
+  const pm={};
+  Object.keys(byLv).forEach(l=>{
+    const ns=byLv[l], n=ns.length;
+    ns.forEach((id,i)=>{
+      pm[id]={
+        x: px+(CW-2*px)*(parseInt(l)/Math.max(maxLv,1)),
+        y: py+(CH-2*py)*(n===1?0.5:i/(n-1))
+      };
+    });
+  });
+  return pm;
+}
+
+// ── Draw ──────────────────────────────────────────────────────
+function draw(pm){
+  const cv=document.getElementById('cv');
+  cv.width=CW; cv.height=CH;
+  const ctx=cv.getContext('2d');
+  ctx.fillStyle='#fafafa'; ctx.fillRect(0,0,CW,CH);
+  const Mset=new Set(Marr);
+
+  // all edges grey
+  edges.forEach(([a,b])=>{
+    const p=pm[a], q=pm[b]; if(!p||!q) return;
+    ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y);
+    ctx.strokeStyle='#cbd5e1'; ctx.lineWidth=1.3; ctx.stroke();
+  });
+
+  // highlight u–v exceptional path — dashed indigo
+  const uvPath=findPath(pU,pV);
+  if(uvPath){
+    const pts=uvPath.map(n=>pm[n]).filter(Boolean);
+    if(pts.length>=2){
+      ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y);
+      pts.slice(1).forEach(p=>ctx.lineTo(p.x,p.y));
+      ctx.strokeStyle='#818cf8'; ctx.lineWidth=2.2;
+      ctx.setLineDash([6,4]); ctx.stroke(); ctx.setLineDash([]);
+    }
+    // d(u,v) annotation midpoint
+    const mx=(pm[pU].x+pm[pV].x)/2;
+    const my=Math.min(pm[pU].y,pm[pV].y)-14;
+    ctx.fillStyle='#6366f1'; ctx.font='600 10px Inter,sans-serif'; ctx.textAlign='center';
+    ctx.fillText(`d(u,v) = ${pD}`, mx, my);
+  }
+
+  // highlight v→w paths — dashed orange
+  const dv=bfsDist(pV), du=bfsDist(pU);
+  Marr.filter(m=>m!==pU&&m!==pV).forEach(w=>{
+    const wpath=findPath(pV,w);
+    if(wpath){
+      const pts=wpath.map(n=>pm[n]).filter(Boolean);
+      if(pts.length>=2){
+        ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y);
+        pts.slice(1).forEach(p=>ctx.lineTo(p.x,p.y));
+        ctx.strokeStyle='rgba(234,88,12,0.4)'; ctx.lineWidth=1.8;
+        ctx.setLineDash([4,4]); ctx.stroke(); ctx.setLineDash([]);
+      }
+    }
+  });
+
+  // NODES
+  nodes.forEach(nd=>{
+    const p=pm[nd]; if(!p) return;
+    const isU = nd===pU, isV = nd===pV, isM = Mset.has(nd);
+
+    if(isU || isV){
+      // GREEN — big, bold border
+      ctx.beginPath(); ctx.arc(p.x,p.y,NR,0,2*Math.PI);
+      ctx.fillStyle='#16a34a'; ctx.fill();
+      ctx.strokeStyle='#14532d'; ctx.lineWidth=2.5; ctx.stroke();
+      ctx.fillStyle='#fff'; ctx.font='bold 10px Inter,sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(nd, p.x, p.y);
+    } else if(isM){
+      // ORANGE — big, bold border
+      ctx.beginPath(); ctx.arc(p.x,p.y,NR,0,2*Math.PI);
+      ctx.fillStyle='#ea580c'; ctx.fill();
+      ctx.strokeStyle='#9a3412'; ctx.lineWidth=2; ctx.stroke();
+      ctx.fillStyle='#fff'; ctx.font='bold 10px Inter,sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(nd, p.x, p.y);
+    } else {
+      // REGULAR — small grey, no emphasis
+      ctx.beginPath(); ctx.arc(p.x,p.y,NR-4,0,2*Math.PI);
+      ctx.fillStyle='#e2e8f0'; ctx.fill();
+      ctx.strokeStyle='#94a3b8'; ctx.lineWidth=0.8; ctx.stroke();
+      ctx.fillStyle='#64748b'; ctx.font='8px Inter,sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(nd, p.x, p.y);
+    }
+
+    // labels [n] below node
+    if(lbls[nd]!==undefined){
+      const yOff = (isU||isV||isM) ? NR+4 : NR;
+      ctx.fillStyle = (isU||isV)?'#14532d':isM?'#9a3412':'#64748b';
+      ctx.font = (isU||isV||isM)?'bold 11px Inter,sans-serif':'9px Inter,sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='top';
+      ctx.fillText('['+lbls[nd]+']', p.x, p.y+yOff);
+    }
+  });
+
+  // u / v / M text ABOVE nodes
+  nodes.forEach(nd=>{
+    const p=pm[nd]; if(!p) return;
+    ctx.textBaseline='bottom'; ctx.textAlign='center';
+    if(nd===pU){
+      ctx.fillStyle='#14532d'; ctx.font='bold 11px Inter,sans-serif';
+      ctx.fillText('u', p.x, p.y-NR-4);
+    } else if(nd===pV){
+      ctx.fillStyle='#14532d'; ctx.font='bold 11px Inter,sans-serif';
+      ctx.fillText('v', p.x, p.y-NR-4);
+    } else if(Mset.has(nd)){
+      const duw=du[nd]||'?', dvw=dv[nd]||'?';
+      ctx.fillStyle='#9a3412'; ctx.font='bold 9px Inter,sans-serif';
+      ctx.fillText('M', p.x, p.y-NR-12);
+      ctx.fillStyle='#475569'; ctx.font='8px Inter,sans-serif';
+      ctx.fillText(`d(u)=${duw}, d(v)=${dvw}`, p.x, p.y-NR-3);
+    }
+  });
+}
+
+function showStatus(ok, msg){
+  const ob=document.getElementById('okbox'), eb=document.getElementById('errbox');
+  ob.style.display='none'; eb.style.display='none';
+  if(ok){ob.textContent=msg;ob.style.display='block';}
+  else{eb.textContent=msg;eb.style.display='block';}
+}
+
+function highlightRule(delta,pd){
+  ['r1','r2','r3','r4'].forEach(id=>document.getElementById(id).className='');
+  if(delta>=5)               document.getElementById('r4').className='a-info';
+  else if(delta===4)         document.getElementById('r1').className='a-ok';
+  else if(delta===3&&pd===2) document.getElementById('r2').className='a-ok';
+  else if(delta===3&&pd===4) document.getElementById('r3').className='a-warn';
+}
+
+function rebuild(){
+  const delta=parseInt(document.getElementById('sd').value);
+  const r    =parseInt(document.getElementById('sr').value);
+  const pd   =parseInt(document.getElementById('spd').value);
+
+  const{u,v,extraHubs}=buildTree(delta,r,pd);
+  pU=u; pV=v; pD=pd;
+
+  // verify distances with BFS
+  const du=bfsDist(u), dv=bfsDist(v);
+  const actualD=du[v];
+  let errParts=[];
+  if(actualD!==pd) errParts.push(`d(u,v)=${actualD} expected ${pd}`);
+  extraHubs.forEach((w,i)=>{
+    const duw=du[w]||0, dvw=dv[w]||0;
+    if(duw<7) errParts.push(`d(u,M${i+1})=${duw} < 7`);
+    if(dvw<7) errParts.push(`d(v,M${i+1})=${dvw} < 7`);
+  });
+
+  if(errParts.length>0){
+    showStatus(false, 'Distance error: '+errParts.join(' | '));
+    return;
+  } else {
+    let okMsg=`d(u,v)=${actualD} ✓`;
+    extraHubs.forEach((w,i)=>{ okMsg+=`  |  d(u,M${i+1})=${du[w]}, d(v,M${i+1})=${dv[w]} ✓`; });
+    showStatus(true, 'All distances verified: '+okMsg);
+  }
+
+  const{span,ok,isDelta3d4,isDeltaHigh,sp,steps,viols}=doLabel(u,v,pd,delta,extraHubs);
+  const pm=makeLayout();
+  draw(pm);
+
+  document.getElementById('cd').textContent=delta;
+  document.getElementById('cr').textContent=r;
+  document.getElementById('cpd').textContent=actualD;
+  const spEl=document.getElementById('csp');
+  spEl.textContent=span;
+  spEl.className='stat-val '+(isDeltaHigh?'info':(ok?'ok':'warn'));
+
+  const badge=document.getElementById('rbadge');
+  const expl=document.getElementById('expl');
+
+  if(viols.length>0){
+    badge.textContent='⚠ L(2,1) Violation'; badge.className='rbadge b-warn';
+    expl.innerHTML=`<b>Violations:</b><br>${viols.slice(0,3).join('<br>')}`;
+  } else if(isDeltaHigh){
+    badge.textContent='λ(T)=Δ+1='+sp; badge.className='rbadge b-info';
+    expl.innerHTML=`<b>Δ=${delta}≥5, d(u,v)=${actualD}</b><br><br>`+
+      `u colored 0, v colored Δ+1=${sp}. Coloring set {0,…,${sp}}.<br>Wider set always sufficient — no Δ+2 needed for Δ≥5.<br>`+
+      `<div class="hl-info">All M-vertices at dist≥7 from u AND v.<br>All L(2,1) constraints satisfied. <b>λ(T)=Δ+1=${sp} ✓</b></div>`;
+  } else if(isDelta3d4){
+    badge.textContent='λ(T)=Δ+2='+sp; badge.className='rbadge b-warn';
+    expl.innerHTML=`<b>Δ=${delta}, d(u,v)=${actualD}</b> — special case!<br><br>`+
+      `Span Δ+1=${delta+1} → set {0,…,${delta+1}} is <b>insufficient</b> for path vertices between u and v.<br>`+
+      `<div class="hl-warn">Span extended to Δ+2=${sp}. Set {0,…,${sp}} satisfies all constraints.<br>`+
+      `All M-vertices at dist≥7 from u AND v. <b>λ(T)=Δ+2=${sp} ✓</b></div>`;
+  } else {
+    badge.textContent='λ(T)=Δ+1='+sp; badge.className='rbadge b-ok';
+    expl.innerHTML=`<b>Δ=${delta}, d(u,v)=${actualD}</b> — standard case.<br><br>`+
+      `f(u)=0, f(v)=Δ+1=${sp}. Coloring set {0,…,${sp}} is sufficient.<br>`+
+      (pd===2?`Internal vertex on u–v path labeled greedily.<br>`
+             :`3 internal path vertices labeled greedily.<br>`)+
+      `<div class="hl-ok">All M-vertices at dist≥7 from u AND v.<br>All L(2,1) constraints satisfied. <b>λ(T)=Δ+1=${sp} ✓</b></div>`;
+  }
+
+  document.getElementById('steps').innerHTML=steps.map(s=>{
+    if(s.t==='head') return`<span class="s-head">${s.x}</span>`;
+    if(s.t==='ok')   return`<span class="s-ok">${s.x}</span><br>`;
+    if(s.t==='warn') return`<span class="s-warn">${s.x}</span><br>`;
+    if(s.t==='info') return`<span class="s-info">${s.x}</span><br>`;
+    return`<span class="s-step">${s.x}</span><br>`;
+  }).join('');
+  highlightRule(delta,pd);
+}
+
+function loadPreset(){
+  const val=document.getElementById('preset').value; if(!val)return;
+  const[d,r,pd]=val.split(',').map(Number);
+  document.getElementById('sd').value=d; document.getElementById('vd').textContent=d;
+  document.getElementById('sr').value=r; document.getElementById('vr').textContent=r;
+  document.getElementById('spd').value=pd; document.getElementById('vpd').textContent=pd;
+  rebuild();
+}
+
+window.onload=()=>rebuild();
+</script>
+</body>
+</html>
